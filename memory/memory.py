@@ -55,14 +55,17 @@ def mouseclick(pos):
 def draw(canvas):
 	a = 0
 	l.set_text("Turns = %s" % turns)
-	for num in cards:
-		canvas.draw_text(str(num), [5 + 50 * a, 78], 80, "White")
-		a += 1
-	for n in unsee:
-		if n not in seen and n not in exposed:
-			canvas.draw_polygon([[50 * n, 0], [50 * (n + 1), 0], [50 * (n + 1), 100], [50 * n, 100]], 2,
-					    line_color="Red", fill_color="Red")
-		canvas.draw_line([50 * (n + 1), 0], [50 * (n + 1), 100], line_width=5, line_color="Black")
+	if len(seen) != 16:
+		for num in cards:
+			canvas.draw_text(str(num), [5 + 50 * a, 78], 80, "White")
+			a += 1
+		for n in unsee:
+			if n not in seen and n not in exposed:
+				canvas.draw_polygon([[50 * n, 0], [50 * (n + 1), 0], [50 * (n + 1), 100], [50 * n, 100]], 2,
+						    line_color="Blue", fill_color="Blue")
+			canvas.draw_line([50 * (n + 1), 0], [50 * (n + 1), 100], line_width=5, line_color="Black")
+	else:
+		canvas.draw_text("You Win! Score: %s" % (turns-1), [100, 78], 80, "White")
 
 
 frame = game.create_frame("Memory", 800, 100)
