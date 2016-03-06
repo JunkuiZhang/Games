@@ -9,4 +9,4 @@ You will win when you get all of them paired.
 ## 1. To do list
 
 - Rewrite the codes
-- ~~ Add victory information ~~
+- ~~Add victory information~~
