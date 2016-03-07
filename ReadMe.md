@@ -13,3 +13,7 @@ This is a repo containing the games written by me using python.
 - Blackjar
 
 	A gambling game.
+
+## 2. Others
+
+> This is a placeholder.
