@@ -1,7 +1,7 @@
 import pygame
 import random
 from pygame.locals import *
-import sys
+import numpy
 
 
 class Worldgrid:
@@ -15,8 +15,19 @@ class Worldgrid:
 		pygame.init()
 		screen = pygame.display.set_mode(self.screen_size)
 		pygame.display.set_caption("Sociaty")
-		indice1 = range(100)
-		indice2 = range(100)
+
+		grid_matrix = numpy.zeros((100, 100))
+		for i in range(100):
+			for j in range(100):
+				v = random.gauss(mu=50, sigma=10)
+				if v <= 0:
+						v = 0
+				elif v >= 100:
+						v = 100
+				else:
+					pass
+				grid_matrix[i, j] = v
+
 		while True:
 			for event in pygame.event.get():
 				if event.type == QUIT:
@@ -27,8 +38,10 @@ class Worldgrid:
 				pos_2 = n * 10
 				pygame.draw.line(screen, (20, 20, 20), (0, pos_1), (1000, pos_2), 1)
 				pygame.draw.line(screen, (20, 20, 20), (pos_1, 0), (pos_2, 1000), 1)
-			for
-			random.gauss(60, 10)
+			for i in range(100):
+				for j in range(100):
+					pygame.draw.rect(screen, (grid_matrix[i, j], grid_matrix[i, j],
+								  grid_matrix[i, j]), (i, j, i + 10, j + 10))
 			pygame.display.update()
 
 
