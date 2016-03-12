@@ -11,4 +11,12 @@ Auto-generaete 600 fields each given a random number from 0 to 1 followed the no
 
 - Calculation of this index see [here](http://junkuizhang.github.io/2016/03/12/Modeling-a-samall-society/)
 
-## 2. This is a placeholder
+$$E=mc^2$$
+
+## 2. To do list
+
+- ~~Write the results in files~~
+- Error controller
+- Make the codes cleaner
+
+## 3. This is a placeholder
