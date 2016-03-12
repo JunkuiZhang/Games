@@ -1,3 +1,4 @@
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
 # Sociaty
 
 ## 0. Introduction
@@ -12,7 +13,7 @@ $$\\Delta =\\sum_{j=1}^n\\sum_{j=1}^n\\frac{|X_j - X_i|}{n^2}$$
     
     Then, the Gini index will be the following
 
-$G = \\frac{\\Delta}{2u}$
+$$G = \\frac{\\Delta}{2u}$$
     
     where u is defined by \\(u = frac{1}{n} sum_{i=1}^n X_i\\)
 
