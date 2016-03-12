@@ -19,10 +19,10 @@ WIDTH = 20
 FIELD_UPPER_BOUND = -1
 FIELD_LOWER_BOUND = 0
 
-MU = 100
-SIGMA = 100
+MU = 80
+SIGMA = 60
 
-THRESHOLD_LOWER_BOUND = 35
+THRESHOLD_LOWER_BOUND = 50
 THRESHOLD_GROW = 1
 # -1 for no threshold upper bound
 THRESHOLD_UPPER_BOUND = -1
@@ -63,10 +63,14 @@ class Worldgrid:
 			save_data = True
 			if not os.path.exists("./Data"):
 					os.mkdir("./Data")
-			f_n = FILE_NAME + ".csv"
-			f = open("./Data/%s" % f_n, "w", newline="")
-			w = csv.writer(f)
-			w.writerow(["Time", "Alive_num", "Richest", "Poorest", "Gini", "Threshold"])
+			f_name0 = FILE_NAME + "0.csv"
+			f_name1 = FILE_NAME + "1.csv"
+			f0 = open("./Data/%s" % f_name0, "w", newline="")
+			f1 = open("./Data/%s" % f_name1, "w", newline="")
+			w0 = csv.writer(f0)
+			w1 = csv.writer(f1)
+			w0.writerow(["Time", "Alive_num", "Richest", "Poorest", "Gini", "Threshold"])
+			w1.writerow(["Time", "ID", "Status", "Field_product", "Welfare", "Threshold"])
 		else:
 			save_data = False
 
@@ -105,6 +109,9 @@ class Worldgrid:
 			rich_i = 0
 			rich_j = 0
 			for en in entity.entity_list:
+				if save_data:
+					w1.writerow([life_time, en["id"], en["state"], grid_matrix[en["position"][0], en["position"][1]],
+						     en["welfare"], entity.threshold])
 				alive += en["state"]
 				if en["welfare"] > rich:
 					rich = en["welfare"]
@@ -126,11 +133,12 @@ class Worldgrid:
 			print("The Gini index is %s" % gini)
 			print("=="*20)
 			if save_data:
-				w.writerow([life_time, alive, rich, poor, gini, entity.threshold])
+				w0.writerow([life_time, alive, rich, poor, gini, entity.threshold])
 			if alive == 0:
 				print("Game over.")
 				if save_data:
-					f.close()
+					f0.close()
+					f1.close()
 				break
 
 
