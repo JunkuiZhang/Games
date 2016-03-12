@@ -109,9 +109,6 @@ class Worldgrid:
 			rich_i = 0
 			rich_j = 0
 			for en in entity.entity_list:
-				if save_data:
-					w1.writerow([life_time, en["id"], en["state"], grid_matrix[en["position"][0], en["position"][1]],
-						     en["welfare"], entity.threshold])
 				alive += en["state"]
 				if en["welfare"] > rich:
 					rich = en["welfare"]
@@ -120,6 +117,9 @@ class Worldgrid:
 				life_time = max([life_time, en["life_length"]])
 				if en["state"] == 1:
 					poor = min([en["welfare"], poor])
+				if save_data:
+					w1.writerow([life_time, en["id"], en["state"], grid_matrix[en["position"][0], en["position"][1]],
+						     en["welfare"], entity.threshold])
 			print("Alive now: %s" % alive)
 			print("Richest: %s" % rich)
 			if poor == 1000000:
