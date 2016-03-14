@@ -3,7 +3,7 @@
 
 ## 0. Introduction
 
-Auto-generaete 600 fields each given a random number from 0 to 1 followed the normal distribution. The number stands for the field's produnciton. Each entity aotu-seek for a high productive field to stay there. Entityies' cost to "live" is ascending with time grows with a initial threshold 60.
+Auto-generaete 600 fields each given a random number from 0 to 1 followed the normal distribution. The number stands for the field's produnciton. Each entity aotu-seek for a high productive field to stay there. Entityies' cost to "live" is ascending with time grows. And the initial threshold is 60.
 
 ## 1. Reference
 
@@ -16,5 +16,6 @@ Auto-generaete 600 fields each given a random number from 0 to 1 followed the no
 - ~~Write the results in files~~
 - Error controller
 - Make the codes cleaner
+- Make the entities smarter, say they can see 2 blocks away rather than 1
 
 ## 3. This is a placeholder
