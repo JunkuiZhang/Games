@@ -9,8 +9,8 @@ import os
 import csv
 import time
 
-
-FILE_NAME = "test"
+# None for not saving files
+FILE_NAME = ""
 
 LENGTH = 800
 ENTITIES = 500
