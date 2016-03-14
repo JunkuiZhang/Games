@@ -7,19 +7,20 @@ from pygame.locals import *
 import numpy
 import os
 import csv
+import time
 
 
-FILE_NAME = "first_test"
+FILE_NAME = "test"
 
 LENGTH = 800
-ENTITIES = 50
+ENTITIES = 500
 WIDTH = 20
 
 # -1 for no field upper bound
 FIELD_UPPER_BOUND = -1
-FIELD_LOWER_BOUND = 0
+FIELD_LOWER_BOUND = 10
 
-MU = 80
+MU = 100
 SIGMA = 60
 
 THRESHOLD_LOWER_BOUND = 50
@@ -37,27 +38,63 @@ class Worldgrid:
 		self.width = width
 		self.po = int(self.length / self.width + 2)
 
-	def generate_grid(self, entity):
+	def generate_world_grid(self):
+		grid_length = self.po
+		grid_matrix = numpy.zeros((grid_length, grid_length))
+		center_index = grid_length // 2
+		center_semidiameter = grid_length // 10
+		medium_semidiameter = grid_length // 4
+
+		def check_values(value):
+			if value < FIELD_LOWER_BOUND:
+				value = FIELD_LOWER_BOUND
+			if FIELD_UPPER_BOUND != -1:
+				if value > FIELD_UPPER_BOUND:
+					value = FIELD_UPPER_BOUND
+			return value
+
+		for i in range(grid_length):
+			if i == 0 or i == grid_length - 1:
+				continue
+			for j in range(grid_length):
+				if j == 0 or j == grid_length - 1:
+					continue
+				if abs(i - center_index) <= center_semidiameter and abs(j - center_index) <= center_semidiameter:
+					v = random.gauss(mu=MU + 300, sigma=SIGMA//3)
+					v = check_values(v)
+					grid_matrix[i, j] = v
+				elif abs(i - center_index) <= medium_semidiameter and abs(j - center_index) <= medium_semidiameter:
+					v = random.gauss(mu=MU + 150, sigma=SIGMA//2)
+					v = check_values(v)
+					grid_matrix[i, j] = v
+				else:
+					v = random.gauss(mu=MU, sigma=SIGMA)
+					v = check_values(v)
+					grid_matrix[i, j] = v
+		return grid_matrix
+
+	def draw_grid(self):
+		grid_matrix = self.generate_world_grid()
+		pygame.init()
+		screen = pygame.display.set_mode(self.screen_size)
+		pygame.display.set_caption("Test")
+		grid_length = self.po
+		width = self.width
+		while True:
+			for i in range(grid_length - 2):
+				for j in range(grid_length - 2):
+					font = pygame.font.SysFont(None, 12)
+					num = font.render(str(grid_matrix[i+1, j+1]), 1, (225, 225, 225))
+					screen.blit(num, (j*width + width//2, i*width + width//2))
+			pygame.display.update()
+			time.sleep(60)
+
+	def run(self, entity):
 		pygame.init()
 		screen = pygame.display.set_mode(self.screen_size)
 		pygame.display.set_caption("Society")
+		grid_matrix = self.generate_world_grid()
 		po = self.po
-		grid_matrix = numpy.zeros((po, po))
-		for i in range(po):
-			if i == 0 or i == po - 1:
-				continue
-			for j in range(po):
-				if j == 0 or j == po - 1:
-					continue
-				v = random.gauss(mu=MU, sigma=SIGMA)
-				if v <= FIELD_LOWER_BOUND:
-						v = FIELD_LOWER_BOUND
-				elif FIELD_UPPER_BOUND != -1:
-						if v > FIELD_UPPER_BOUND:
-							v = FIELD_UPPER_BOUND
-				else:
-					pass
-				grid_matrix[i, j] = v
 
 		if FILE_NAME != "":
 			save_data = True
@@ -74,10 +111,16 @@ class Worldgrid:
 		else:
 			save_data = False
 
-		def getGini(ent):
+		def get_gini(ent):
 			incomes = list()
 			for en in ent:
-				incomes.append(grid_matrix[en["position"][0], en["position"][1]])
+				if en["state"] == 1:
+					# incomes.append(en["welfare"])
+					incomes.append(grid_matrix[en["position"][0], en["position"][1]])
+				else:
+					pass
+			if len(incomes) == 0:
+				return 0
 			average_income = sum(incomes) / len(incomes)
 			summation = 0
 			for income1 in incomes:
@@ -129,7 +172,7 @@ class Worldgrid:
 			print("World threshold %s" % entity.threshold)
 			product = grid_matrix[rich_i, rich_j]
 			print("The richest's field product %s" % product)
-			gini = getGini(entity.entity_list)
+			gini = get_gini(entity.entity_list)
 			print("The Gini index is %s" % gini)
 			print("=="*20)
 			if save_data:
@@ -149,6 +192,9 @@ class Entity:
 		self.po = po
 		self.threshold = threshold
 		self.entity_list = list()
+		if total_num >= (po - 2) ** 2:
+			print("You have inefficient grid.")
+			raise ValueError
 		for n in range(total_num):
 			self.entity_list.append({
 				"id": n,
@@ -162,16 +208,15 @@ class Entity:
 	def get_position_matrix(self):
 		m = numpy.zeros((self.po, self.po))
 		for en in self.entity_list:
-			row_num = random.choice(range(self.po-2))
-			col_num = random.choice(range(self.po-2))
 			while True:
+				row_num = random.choice(range(self.po-2))
+				col_num = random.choice(range(self.po-2))
 				if m[row_num + 1, col_num + 1] == 0:
 					m[row_num + 1, col_num + 1] = 1
 					en["position"] = [row_num+1, col_num + 1]
 					break
 				else:
-					row_num = random.choice(range(self.po - 2))
-					col_num = random.choice(range(self.po - 2))
+					pass
 		return m
 
 	def draw_entities(self, screen, width):
@@ -229,4 +274,5 @@ class Entity:
 if __name__ == '__main__':
 	w = Worldgrid()
 	e = Entity(w.population, w.po)
-	w.generate_grid(e)
+	w.run(e)
+	# w.draw_grid()
