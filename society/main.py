@@ -13,8 +13,11 @@ import time
 FILE_NAME = ""
 
 LENGTH = 800
-ENTITIES = 500
-WIDTH = 20
+ENTITIES = 4
+WIDTH = 400
+
+# entity's behavior
+ENTITY_ABILITY = 2
 
 # -1 for no field upper bound
 FIELD_UPPER_BOUND = -1
@@ -42,8 +45,8 @@ class Worldgrid:
 		grid_length = self.po
 		grid_matrix = numpy.zeros((grid_length, grid_length))
 		center_index = grid_length // 2
-		center_semidiameter = grid_length // 10
-		medium_semidiameter = grid_length // 4
+		center_semidiameter = grid_length // 16
+		medium_semidiameter = grid_length // 10
 
 		def check_values(value):
 			if value < FIELD_LOWER_BOUND:
@@ -192,8 +195,8 @@ class Entity:
 		self.po = po
 		self.threshold = threshold
 		self.entity_list = list()
-		if total_num >= (po - 2) ** 2:
-			print("You have inefficient grid.")
+		if total_num > (po - 2) ** 2:
+			print("You have insufficient grid.")
 			raise ValueError
 		for n in range(total_num):
 			self.entity_list.append({
@@ -203,26 +206,29 @@ class Entity:
 				"life_length": 0,
 				"position": [0, 0]
 			})
-		self.position_matrix = self.get_position_matrix()
+		self.generate_entities_position()
 
-	def get_position_matrix(self):
-		m = numpy.zeros((self.po, self.po))
+	def generate_entities_position(self):
+		positions = list()
+		positions.append([0, 0])
 		for en in self.entity_list:
-			while True:
+			row_num = random.choice(range(self.po-2))
+			col_num = random.choice(range(self.po-2))
+			while [row_num + 1, col_num + 1] in positions:
 				row_num = random.choice(range(self.po-2))
 				col_num = random.choice(range(self.po-2))
-				if m[row_num + 1, col_num + 1] == 0:
-					m[row_num + 1, col_num + 1] = 1
-					en["position"] = [row_num+1, col_num + 1]
-					break
-				else:
-					pass
-		return m
+			positions.append([row_num + 1, col_num + 1])
+			en["position"] = [row_num + 1, col_num + 1]
 
 	def draw_entities(self, screen, width):
+		positions = list()
+		for en in self.entity_list:
+			if en["state"] == 0:
+				continue
+			positions.append(en["position"])
 		for i in range(self.po):
 				for j in range(self.po):
-					if self.position_matrix[i, j] == 1:
+					if [i, j] in positions:
 						pygame.draw.rect(screen, (225, 225, 225),
 								 (j*width+1, i*width+1, (j+1)*width-1, (i+1)*width-1))
 					else:
@@ -231,48 +237,65 @@ class Entity:
 
 	def entities_move(self, grid_matrix):
 		world_time = 1
+		position_list = list()
+		for en in self.entity_list:
+			if en["state"] == 0:
+				continue
+			position_list.append(en["position"])
 		for en in self.entity_list:
 			if en["state"] == 0:
 				continue
 			i = en["position"][0]
 			j = en["position"][1]
-			right_value = grid_matrix[i, j+1]
-			down_value = grid_matrix[i+1, j]
-			up_value = grid_matrix[i-1, j]
-			left_value = grid_matrix[i, j-1]
-			mid_value = grid_matrix[i, j]
-			if right_value > max([down_value, up_value, left_value, mid_value]) and self.position_matrix[i, j+1] != 1:
-				self.position_matrix[i, j+1] = 1
-				self.position_matrix[i, j] = 0
-				en["position"] = [i, j + 1]
-			elif down_value > max([right_value, up_value, left_value, mid_value]) and self.position_matrix[i+1, j] != 1:
-				self.position_matrix[i+1, j] = 1
-				self.position_matrix[i, j] = 0
-				en["position"] = [i + 1, j]
-			elif up_value > max([down_value, right_value, left_value, mid_value]) and self.position_matrix[i-1, j] != 1:
-				self.position_matrix[i-1, j] = 1
-				self.position_matrix[i, j] = 0
-				en["position"] = [i - 1, j]
-			elif left_value > max([down_value, up_value, right_value, mid_value]) and self.position_matrix[i, j-1] != 1:
-				self.position_matrix[i, j-1] = 1
-				self.position_matrix[i, j] = 0
-				en["position"] = [i, j - 1]
-			else:
-				pass
+
+			movement_list = list()
+			movement_list.append({
+				"position": [i, j],
+				"value": grid_matrix[i, j]
+			})
+			for row_num in range(i-ENTITY_ABILITY, i+ENTITY_ABILITY+1, 1):
+				if row_num == i:
+					continue
+				if row_num > self.po - 1 or row_num < 0:
+					continue
+				movement_list.append({
+					"position": [row_num, j],
+					"value": grid_matrix[row_num, j]
+				})
+			for col_num in range(j-ENTITY_ABILITY, j+ENTITY_ABILITY+1, 1):
+				if col_num == j:
+					continue
+				if col_num > self.po - 1 or col_num < 0:
+					continue
+				movement_list.append({
+					"position": [i, col_num],
+					"value": grid_matrix[i, col_num]
+				})
+
+			def find_max(ls):
+				max_position = ls[0]["position"]
+				max_value = ls[0]["value"]
+				for l in ls:
+					if l["value"] > max_value and l["position"] not in position_list:
+						max_position = l["position"]
+				position_list.append(max_position)
+				position_list.pop(position_list.index(ls[0]["position"]))
+				return max_position
+
+			en["position"] = find_max(movement_list)
 			en["welfare"] = en["welfare"] + grid_matrix[en["position"][0], en["position"][1]] - self.threshold
 			en["life_length"] += world_time
 			if en["welfare"] < 0:
 				en["state"] = 0
-				self.position_matrix[en["position"][0], en["position"][1]] = 0
 		if THRESHOLD_UPPER_BOUND == -1:
 			self.threshold += THRESHOLD_GROW
 		elif self.threshold < THRESHOLD_UPPER_BOUND:
 			self.threshold += THRESHOLD_GROW
-		world_time += 1
 
 
 if __name__ == '__main__':
 	w = Worldgrid()
 	e = Entity(w.population, w.po)
 	w.run(e)
+	# codes blow this line is used for testing
 	# w.draw_grid()
