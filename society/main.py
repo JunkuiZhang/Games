@@ -39,7 +39,7 @@ class Worldgrid:
 	def __init__(self, length=LENGTH, population=ENTITIES, width=WIDTH):
 		self.length = length
 		self.population = population
-		self.screen_size = (1600, length + 200)
+		self.screen_size = (length, length)
 		self.width = width
 		self.po = int(self.length / self.width + 2)
 		self.field_greatest_product = list()
